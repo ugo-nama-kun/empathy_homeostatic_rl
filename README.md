@@ -11,7 +11,7 @@ tensorboard
 pygame
 
 # gymnasium environments, available from: https://github.com/ugo-nama-kun/tiny_empathy
-tiny_empathy==1.9.3
+tiny_empathy==1.9.4
 ```
 
 ### How to Run
@@ -19,20 +19,20 @@ tiny_empathy==1.9.3
 `--enable-empathy` option enable the cognitive empathy in the agent and environment setting, while `--weight-empathy` option sets
 the strength of the affective empathy (default: 0.0, disabling the affective empathy).
 ```shell
-python train_sharefood.py --enable-empathy --weight_empathy=0.5
+python train_sharefood.py --cognitive-empathy --weight_empathy=0.5
 ```
 
 #### Experiments with self-decoder experiments
 In the self-decoder environments (foodshare & grid_rooms), cognitive empathy is enabled by default. `--enable-learning` option
 toggle the learning process of the self-decoder. `--decoding-mode` takes two modes, `full` or `affect`. 
 
-The `full` mode 
-decodes physiological responses (emotional-feature) of the other agent, for both of the observation of HRRL and reward (drive) calculation.
+The `A` mode (type-A cognitive empathy) decode the emotional expression only for the reward calculation and the HRRL use the emotional expression as an observation directly.
+
+The `B` mode (type-B cognitive empathy) decodes the emotional expression (emotional-feature) of the other agent, for both of the observation of HRRL and reward (drive) calculation.
 
 
-The `affect` mode decode the physiological response only for the reward calculation and the HRRL use the physiological response as an observation directly.
 ```shell
-python train_foodshare_decoder_learning.py --enable-learning --weight_empathy=0.5 --decoding-mode=full
+python train_foodshare_decoder_learning.py --enable-learning --weight_empathy=0.5 --decoding-mode=A
 ```
 
 
