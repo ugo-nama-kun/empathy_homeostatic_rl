@@ -79,12 +79,12 @@ class Args:
     target_kl: float = None
     """the target KL divergence threshold"""
 
-    enable_empathy: bool = False
+    cognitive_empathy: bool = False
     """if toggled, enable cognitive empathy """
     enable_learning: bool = False
     """if toggled, enable decoder learning"""
-    decoding_mode: str = "full"
-    """ decoding mode; full or affect"""
+    decoding_mode: str = "A"
+    """ decoding mode; A or B"""
     weight_empathy: float = 0.5
     """ affective empathy weight """
     dim_emotional_feature: int = 5
@@ -102,7 +102,7 @@ class Args:
 def make_env(args, enc):
     def thunk():
         env = GridRoomsDecoderLearningEnv(
-            enable_empathy=args.enable_empathy,
+            enable_empathy=args.cognitive_empathy,
             decoding_mode=args.decoding_mode,
             dim_emotional_feature=args.dim_emotional_feature,
             emotional_encoder=enc,
@@ -249,12 +249,12 @@ if __name__ == "__main__":
     args.num_iterations = args.total_timesteps // args.batch_size
 
     s = ""
-    if args.decoding_mode == "full":
-        s += "full_inference"
-        args.wandb_group_name += "/full_inference"
-    elif args.decoding_mode == "affect":
-        s += "affect_inference"
-        args.wandb_group_name += "/affect_inference"
+    if args.decoding_mode == "B":
+        s += "B"
+        args.wandb_group_name += "/type_B"
+    elif args.decoding_mode == "A":
+        s += "A"
+        args.wandb_group_name += "/type_A"
     else:
         raise ValueError(f"invalid mode: {args.decoding_mode}")
 
@@ -265,7 +265,7 @@ if __name__ == "__main__":
         s += "-no_learn"
         args.wandb_group_name += "-no_learn"
 
-    if args.enable_empathy is False:
+    if args.cognitive_empathy is False:
         s += "-a"
         args.wandb_group_name += "-a"
     if args.weight_empathy == 0.0:
@@ -506,15 +506,15 @@ if __name__ == "__main__":
         s += "-learn"
     else:
         s += "-no_learn"
-    if args.enable_empathy is False:
+    if args.cognitive_empathy is False:
         s += "-a"
     if args.weight_empathy == 0.0:
         s += "-c"
 
-    if args.decoding_mode == "full":
-        PATH = p + f"/full_inference-{s}"
-    elif args.decoding_mode == "affect":
-        PATH = p + f"/affective_inference-{s}"
+    if args.decoding_mode == "B":
+        PATH = p + f"/type_B-{s}"
+    elif args.decoding_mode == "A":
+        PATH = p + f"/type_A-{s}"
 
     else:
         raise ValueError(f"invalid mode: {args.decoding_mode}")

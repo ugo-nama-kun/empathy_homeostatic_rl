@@ -76,7 +76,7 @@ class Args:
     target_kl: float = None
     """the target KL divergence threshold"""
 
-    enable_empathy: bool = False
+    cognitive_empathy: bool = False
     weight_empathy: float = 0.0
 
     # to be filled in runtime
@@ -88,18 +88,18 @@ class Args:
     """the number of iterations (computed in runtime)"""
 
 
-def make_env(env_id, idx, capture_video, run_name, enable_empathy, weight_empathy):
+def make_env(env_id, idx, capture_video, run_name, cognitive_empathy, weight_empathy):
     def thunk():
         if capture_video and idx == 0:
             env = gym.make(env_id,
                            render_mode="rgb_array",
-                           enable_empathy=enable_empathy,
+                           enable_empathy=cognitive_empathy,
                            weight_empathy=weight_empathy)
             env = gym.wrappers.RecordVideo(env, f"videos/{run_name}")
         else:
             env = gym.make(env_id,
                            size=5,
-                           enable_empathy=enable_empathy,
+                           enable_empathy=cognitive_empathy,
                            weight_empathy=weight_empathy)
 
         env = GridRoomsWrapper(env)
@@ -217,16 +217,16 @@ if __name__ == "__main__":
     args.num_iterations = args.total_timesteps // args.batch_size
 
     s = ""
-    if args.enable_empathy is True and args.weight_empathy > 0:
+    if args.cognitive_empathy is True and args.weight_empathy > 0:
         s += "full_empathy"
         args.wandb_group_name += "/full_emp"
-    elif args.enable_empathy is True and args.weight_empathy == 0:
+    elif args.cognitive_empathy is True and args.weight_empathy == 0:
         s += "emp_channel"
         args.wandb_group_name += "/channel_emp"
-    elif args.enable_empathy is False and args.weight_empathy > 0:
+    elif args.cognitive_empathy is False and args.weight_empathy > 0:
         s += "emp_reward"
         args.wandb_group_name += "/reward_emp"
-    elif args.enable_empathy is False and args.weight_empathy == 0:
+    elif args.cognitive_empathy is False and args.weight_empathy == 0:
         s += "no_empathy"
         args.wandb_group_name += "/no_emp"
 
@@ -261,14 +261,14 @@ if __name__ == "__main__":
 
     # env setup
     envs = gym.vector.SyncVectorEnv(
-        [make_env(args.env_id, i, args.capture_video, run_name, args.enable_empathy, args.weight_empathy) for i in range(args.num_envs)],
+        [make_env(args.env_id, i, args.capture_video, run_name, args.cognitive_empathy, args.weight_empathy) for i in range(args.num_envs)],
     )
     test_envs = gym.vector.SyncVectorEnv(
-        [make_env(args.env_id, i, args.capture_video, run_name, args.enable_empathy, args.weight_empathy) for i in range(args.num_test_envs)],
+        [make_env(args.env_id, i, args.capture_video, run_name, args.cognitive_empathy, args.weight_empathy) for i in range(args.num_test_envs)],
     )
     assert isinstance(envs.single_action_space, gym.spaces.Discrete), "only discrete action space is supported"
 
-    agent = Agent(envs, args.enable_empathy).to(device)
+    agent = Agent(envs, args.cognitive_empathy).to(device)
     optimizer = optim.Adam(agent.parameters(), lr=args.learning_rate, eps=1e-5)
 
     # ALGO Logic: Storage setup
@@ -443,20 +443,20 @@ if __name__ == "__main__":
     s = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     p = f"models/{args.env_id.split('/')[1]}"
     os.makedirs(p, exist_ok=True)
-    if args.enable_empathy is True and args.weight_empathy > 0:
+    if args.cognitive_empathy is True and args.weight_empathy > 0:
         os.makedirs(p + f"/full", exist_ok=True)
         PATH = p + f"/full/full-{s}.pt"
-    elif args.enable_empathy is True and args.weight_empathy == 0:
-        os.makedirs(p + f"/channel", exist_ok=True)
-        PATH = p + f"/channel/channel-{s}.pt"
-    elif args.enable_empathy is False and args.weight_empathy > 0:
-        os.makedirs(p + f"/reward", exist_ok=True)
-        PATH = p + f"/reward/reward-{s}.pt"
-    elif args.enable_empathy is False and args.weight_empathy == 0:
+    elif args.cognitive_empathy is True and args.weight_empathy == 0:
+        os.makedirs(p + f"/cognitive", exist_ok=True)
+        PATH = p + f"/cognitive/cognitive-{s}.pt"
+    elif args.cognitive_empathy is False and args.weight_empathy > 0:
+        os.makedirs(p + f"/affective", exist_ok=True)
+        PATH = p + f"/affective/affective-{s}.pt"
+    elif args.cognitive_empathy is False and args.weight_empathy == 0:
         os.makedirs(p + f"/no", exist_ok=True)
         PATH = p + f"/no/no-{s}.pt"
     else:
-        raise ValueError(f"invalid setting : {(args.enable_empathy, args.weight_empathy)}")
+        raise ValueError(f"invalid setting : {(args.cognitive_empathy, args.weight_empathy)}")
 
     torch.save(agent.state_dict(), PATH)
 
